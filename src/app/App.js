@@ -21,83 +21,48 @@ export default class App extends React.Component {
             const text = (e.target.result);
 
             const parsed = ICAL.parse(text.trim());
-            var comp = new ICAL.Component(parsed);
-            var eventComps = comp.getAllSubcomponents("vevent");
-            // console.log(JSON.stringify(eventComps));
+            const comp = new ICAL.Component(parsed);
+            const eventComps = comp.getAllSubcomponents("vevent");
 
             var events = eventComps.map(item => {
-                if (item.getFirstPropertyValue("class") === "PRIVATE"){ //do not show on calendar if the class is private
-                    return null;
-                } else if (item.getFirstPropertyValue("rrule") != null) { //recurring event
+                if (item.getFirstPropertyValue("class") === "PRIVATE"){ 
+                    return null; //do not show on calendar if the class is private
+                }
+                else {
                     const title = item.getFirstPropertyValue("summary");
                     const groupId = item.getFirstPropertyValue("categories");
                     const location = item.getFirstPropertyValue("location");
 
-                    const start = item.getFirstPropertyValue("dtstart");
-                    const end = item.getFirstPropertyValue("dtend");
+                    const start = item.getFirstPropertyValue("dtstart").toString();
+                    const end = item.getFirstPropertyValue("dtend").toString();
 
-                    const startTime = start.toString().split("T").pop() === '00:00:00' ? '24:00:00' : start.toString().split("T").pop() ;
-                    const endTime = end.toString().split("T").pop() === '00:00:00' ? '24:00:00' : end.toString().split("T").pop();
+                    //if I don't replace 00:00:00 with 24:00:00 any event that starts or ends with 00:00:00 will
+                    //either not show or get displayed incorrectly on the calendar
+                    const startTime = start.split("T").pop() === '00:00:00' ? '24:00:00' : start.split("T").pop() ;
+                    const endTime = end.split("T").pop() === '00:00:00' ? '24:00:00' : end.split("T").pop();
+
+                    const rrule = item.getFirstPropertyValue("rrule");
 
                     let daysOfWeek;
                     let color = "";
 
-
-                    switch(item.getFirstPropertyValue("summary")){
-                    case "S: Evening Ritual":
-                    case "S: Morning Ritual":
-                        color="#ffbd33";
-                        break;
-                    case "S: Exercise":
-                        color="#a0f694";
-                        break;
-                    case "S: Meditation":
-                        color="#e58755";
-                        break;
-                    case "S: Deep Work Darkroom":
-                        daysOfWeek = ['4','6'];
-                        break;
-                    case "S: Deep Work Vanir":
-                        color = "#cbcbcb";
-                        daysOfWeek = ['5'];
-                        break;
-                    default:
-                    }
-
-                    const toReturn = {
+                    let eventObject = {
                         "title": title,
-                        "groupId": groupId,
                         "location": location,
-                        "daysOfWeek": daysOfWeek,
-                        "startTime": startTime,
-                        "endTime": endTime,
-                        "color": color,
-                        "textColor": '#000',
+                        "groupId": groupId,
                     };
-                    console.log(item.getFirstPropertyValue("summary"), start, end, color);
-                    return toReturn;
-                } else {
-                    let color = "";
-
-                    switch(item.getFirstPropertyValue("categories")){
-                    case "university":
-                        color="#c70039";
-                        break;
-                    default:
+                    if (rrule !== null){
+                        eventObject.daysOfWeek = daysOfWeek;
+                        eventObject.startTime = startTime;
+                        eventObject.endTime = endTime;
+                    } else {
+                        eventObject.start = start;
+                        eventObject.end = end;
                     }
-
-                    const toReturn2 = {
-                        "title": item.getFirstPropertyValue("summary"),
-                        "location": item.getFirstPropertyValue("location"),
-                        "groupId": item.getFirstPropertyValue("categories"),
-                        "start": item.getFirstPropertyValue("dtstart").toString(),
-                        "end": item.getFirstPropertyValue("dtend").toString(),
-                        "color": color,
-                    };
-                    return toReturn2;
+                    console.log(eventObject);
+                    return eventObject;
                 }
             });
-
             this.setState({currentEvents: events});
         };
         reader.readAsText(e.target.files[0]);
