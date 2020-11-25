@@ -1,0 +1,39 @@
+* Emacs Org-Mode Time Blocking
+  Export your Org Agenda files to iCalendar format and visualize the
+  information in this Calendar App.
+
+  [[./prototype.png]]
+
+  
+  Before you can use the exported ics files in this app, you need
+  to add the following options into you emacs config file.
+  
+  If you're using *Spacemacs* you have to specify these options
+  in the spacemacs configuration file (you can access it by pressing
+  ~SPC f e d~) under ~defun dotspacemacs/user-config()~.
+
+#+BEGIN_SRC emacs-lisp
+     ;; The exporter complains if you try to export schedules and deadlines without
+     ;; a default duration so we specify it here. The number is in minutes.
+     (setq org-agenda-default-appointment-duration 60)
+     ;; We have to include the below code otherwise the todo, scheduled, and
+     ;; deadline tasks will not be assigned correct information and won't be
+     ;; displayed in the ics file I'm sure there is a better way to do this
+     ;; but this works for now.
+     (setq org-icalendar-include-todo t
+           org-icalendar-use-deadline '(event-if-todo event-if-not-todo todo-due)
+           org-icalendar-use-scheduled '(event-if-todo event-if-not-todo toto-start)
+           org-icalendar-with-timestamps t
+           ;; If you want to export all your specified agenda files into a single
+           ;; ics file you have to specify a name to it in the config as well.
+           ;; Otherwise the exporter won't do anything.
+           org-icalendar-combined-agenda-file "combined_agenda.ics")
+#+END_SRC
+
+This makes your org agenda files display correct information when
+exported using iCalendar format. If you have multiple files you would
+export using ~org-icalendar-combine-agenda-files~ instead of
+~org-icalendar-export-to-ics~. This will export all your agenda files
+and put them into a combined ics file that is called "combined_agenda.ics".
+You can change this name to anything you want.
+

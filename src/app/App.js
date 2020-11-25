@@ -36,8 +36,8 @@ export default class App extends React.Component {
                     const start = item.getFirstPropertyValue("dtstart").toString();
                     const end = item.getFirstPropertyValue("dtend").toString();
 
-                    //if I don't replace 00:00:00 with 24:00:00 any event that starts or ends with 00:00:00 will
-                    //either not show or get displayed incorrectly on the calendar
+                    // if I don't replace 00:00:00 with 24:00:00 any event that starts or ends with 00:00:00 will
+                    // either not show or get displayed incorrectly on the calendar
                     const startTime = start.split("T").pop() === '00:00:00' ? '24:00:00' : start.split("T").pop() ;
                     const endTime = end.split("T").pop() === '00:00:00' ? '24:00:00' : end.split("T").pop();
 
@@ -67,7 +67,6 @@ export default class App extends React.Component {
         };
         reader.readAsText(e.target.files[0]);
     }
-
 
     render() {
         return (
